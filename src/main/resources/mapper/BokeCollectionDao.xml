@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.BokeCollectionDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.boke_id as bokeId
+        ,a.yonghu_id as yonghuId
+        ,a.boke_collection_types as bokeCollectionTypes
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.BokeCollectionView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,boke.boke_name as bokeName
+        ,boke.boke_types as bokeTypes
+        ,boke.boke_photo as bokePhoto
+        ,boke.boke_video as bokeVideo
+        ,boke.boke_file as bokeFile
+        ,boke.boke_music as bokeMusic
+        ,boke.zan_number as zanNumber
+        ,boke.cai_number as caiNumber
+        ,boke.yonghu_id as bokeYonghuId
+        ,boke.boke_neirong_types as bokeNeirongTypes
+        ,boke.boke_content as bokeContent
+        ,boke.boke_yesno_types as bokeYesnoTypes
+        ,boke.boke_yesno_text as bokeYesnoText
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_email as yonghuEmail
+        ,yonghu.yonghu_delete as yonghuDelete
+
+        FROM boke_collection  a
+        left JOIN boke boke ON a.boke_id = boke.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.bokeId != null and params.bokeId != ''">
+                and (
+                    a.boke_id = #{params.bokeId}
+                )
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                    or boke.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test="params.bokeCollectionTypes != null and params.bokeCollectionTypes != ''">
+                and a.boke_collection_types = #{params.bokeCollectionTypes}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断博客信息的id不为空 -->
+            <if test=" params.bokeIdNotNull != '' and params.bokeIdNotNull != null and params.bokeIdNotNull != 'null' ">
+                and a.boke_id IS NOT NULL
+            </if>
+            <if test=" params.bokeName != '' and params.bokeName != null and params.bokeName != 'null' ">
+                and boke.boke_name like CONCAT('%',#{params.bokeName},'%')
+            </if>
+            <if test="params.bokeTypes != null  and params.bokeTypes != ''">
+                and boke.boke_types = #{params.bokeTypes}
+            </if>
+
+            <if test=" params.bokeVideo != '' and params.bokeVideo != null and params.bokeVideo != 'null' ">
+                and boke.boke_video like CONCAT('%',#{params.bokeVideo},'%')
+            </if>
+            <if test=" params.bokeMusic != '' and params.bokeMusic != null and params.bokeMusic != 'null' ">
+                and boke.boke_music like CONCAT('%',#{params.bokeMusic},'%')
+            </if>
+            <if test="params.zanNumberStart != null  and params.zanNumberStart != '' ">
+                <![CDATA[  and boke.zan_number >= #{params.zanNumberStart}   ]]>
+            </if>
+            <if test="params.zanNumberEnd != null  and params.zanNumberEnd != '' ">
+                <![CDATA[  and boke.zan_number <= #{params.zanNumberEnd}   ]]>
+            </if>
+            <if test="params.zanNumber != null  and params.zanNumber != '' ">
+                and boke.zan_number = #{params.zanNumber}
+            </if>
+            <if test="params.caiNumberStart != null  and params.caiNumberStart != '' ">
+                <![CDATA[  and boke.cai_number >= #{params.caiNumberStart}   ]]>
+            </if>
+            <if test="params.caiNumberEnd != null  and params.caiNumberEnd != '' ">
+                <![CDATA[  and boke.cai_number <= #{params.caiNumberEnd}   ]]>
+            </if>
+            <if test="params.caiNumber != null  and params.caiNumber != '' ">
+                and boke.cai_number = #{params.caiNumber}
+            </if>
+            <if test="params.bokeNeirongTypes != null  and params.bokeNeirongTypes != ''">
+                and boke.boke_neirong_types = #{params.bokeNeirongTypes}
+            </if>
+
+            <if test=" params.bokeContent != '' and params.bokeContent != null and params.bokeContent != 'null' ">
+                and boke.boke_content like CONCAT('%',#{params.bokeContent},'%')
+            </if>
+            <if test="params.bokeYesnoTypes != null  and params.bokeYesnoTypes != ''">
+                and boke.boke_yesno_types = #{params.bokeYesnoTypes}
+            </if>
+
+            <if test=" params.bokeYesnoText != '' and params.bokeYesnoText != null and params.bokeYesnoText != 'null' ">
+                and boke.boke_yesno_text like CONCAT('%',#{params.bokeYesnoText},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(boke.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(boke.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+                <!-- 判断用户的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+            <if test="params.yonghuDeleteStart != null  and params.yonghuDeleteStart != '' ">
+                <![CDATA[  and yonghu.yonghu_delete >= #{params.yonghuDeleteStart}   ]]>
+            </if>
+            <if test="params.yonghuDeleteEnd != null  and params.yonghuDeleteEnd != '' ">
+                <![CDATA[  and yonghu.yonghu_delete <= #{params.yonghuDeleteEnd}   ]]>
+            </if>
+            <if test="params.yonghuDelete != null  and params.yonghuDelete != '' ">
+                and yonghu.yonghu_delete = #{params.yonghuDelete}
+            </if>
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
